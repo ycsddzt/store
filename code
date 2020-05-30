@@ -1,0 +1,94 @@
+#include <iostream>
+#include <stdio.h>
+#include <time.h>
+
+typedef struct E {
+    char name[16];
+    float dmg;
+    float mgc;
+    struct E* next;
+}Enemy;
+typedef struct {
+    int num;
+    Enemy* next;
+}EnemyLinkedList;
+
+void AddNewEnemy(EnemyLinkedList* head, Enemy* newEnemy) {
+    newEnemy->next = head->next;
+    head->next = newEnemy;
+    head->num++;
+}
+void Printlist(Enemy*head)
+{
+    Enemy* p = head;
+    for (int i = 0; i < 5; i++)
+    {
+        printf("name=%s damage=%f magic=%f\n", p->name, p->dmg, p->mgc);
+        p++;
+    }
+    
+}
+void RemoveEnemy(EnemyLinkedList* head, Enemy* enemy) {
+    Enemy* p = head->next;
+    if (p == enemy) {
+        head->next = p->next;
+        free(p);
+        head->num--;
+        return;
+    }
+    while (p->next != enemy && p->next != NULL)
+        p = p->next;
+    if (p->next == enemy) {
+        Enemy* tmp = p->next->next;
+        free(p->next);
+        p->next = tmp;
+        head->num--;
+    }
+}
+Enemy* FindByName(EnemyLinkedList* head, char* name) {
+    Enemy* p = head->next;
+    while (p != NULL && strcmp(p->name, name) != 0)
+        p = p->next;
+    return p;
+}
+Enemy* SortBydmg(Enemy* first) {
+    if (first == NULL || first->next == NULL)
+        return first;
+    Enemy* min = first;
+    Enemy* p = first->next;
+    while (p->next != NULL) {
+        if (p->next->dmg < min->next->dmg)
+            min = p;
+        p =p ->next;
+    }
+    if (min->next->dmg < first->dmg) {
+        p = min->next;
+        min->next = p->next;
+        p->next = first;
+        first = p;
+    }
+    first->next = SortBydmg(first->next);
+    return first;
+}
+
+int main()
+{
+    EnemyLinkedList* head = (EnemyLinkedList*)malloc(sizeof(EnemyLinkedList));
+    head->next = NULL;
+    head->num = 0;
+
+
+    for (int i = 0; i < 5; i++) {
+        Enemy* p = (Enemy*)malloc(sizeof(Enemy));
+        printf("请输入敌人名称：");
+        scanf_s("%s", &p->name,16);
+        printf("请输入敌人伤害：");
+        scanf_s("%f", &p->dmg);
+        printf("请输入敌人魔法：");
+        scanf_s("%f", &p->mgc);
+        AddNewEnemy(head, p);
+    }
+    Printlist(head->next);
+
+    
+}
